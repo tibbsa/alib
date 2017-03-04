@@ -1,0 +1,162 @@
+#DEBUG=1
+Project: alib.lib test.exe
+
+##########################################################################
+.AUTODEPEND
+.SILENT
+.PATH.obj = OBJ
+
+!ifdef DEBUG
+DEBUG=DEBUG;MEMDEBUG
+COPT=-N
+!endif
+
+CC = Bcc -D$(DEBUG) +util.CFG
+TASM = TASM /t /Mx
+TLIB = tlib
+TLINK = tlink
+LIBPATH = C:BC\LIB
+INCLUDEPATH = C:\BC\INCLUDE;H;E:\SOURCE\RESOURCE\SNIP;E:\SOURCE\RESOURCE\BBS\SQUISH\H
+
+
+.c.obj:
+  $(CC) -c {$< }
+
+.cpp.obj:
+  $(CC) -c {$< }
+
+.asm.obj:
+   $(TASM) $<
+
+##########################################################################
+Lib_Files = alib.obj       alkbd.obj      almtsk.obj     allog.obj   \
+            albug.obj      almem.obj      altimer.obj    almapi.obj  \
+            alstring.obj   altg.obj       alfile.obj     al_crc32.obj\
+            al_td.obj      aljam.obj      alfos.obj      al_crc16.obj
+
+Test_Files= alib.lib       test.obj       \source\resource\bbs\squish\lib\bc_dos_l.lib
+
+# TARGET: ALIB.LIB #######################################################
+alib.lib: util.cfg $(Lib_Files)
+          $(TLIB) alib.lib /C /0 @&&|
+          -+obj\alib.obj      \
+          -+obj\alkbd.obj     \
+          -+obj\almtsk.obj    \
+          -+obj\allog.obj     \
+          -+obj\albug.obj     \
+          -+obj\almem.obj     \
+          -+obj\altimer.obj   \
+          -+obj\almapi.obj    \
+          -+obj\alstring.obj  \
+          -+obj\altg.obj      \
+          -+obj\alfile.obj    \
+          -+obj\al_crc32.obj  \
+          -+obj\al_td.obj     \
+          -+obj\aljam.obj     \
+          -+obj\alfos.obj     \
+          -+obj\al_crc16.obj
+|,map\lib.lst
+          erase /q *.bak >&nul:
+!ifdef DEBUG
+          copy/b alib.lib C:\Bc\lib\alib.lib
+!else
+          copy/b alib.lib C:\Bc\lib\alibx.lib
+!endif
+
+# TARGET: TEST.EXE #######################################################
+test.exE: util.cfg $(Test_Files) alib.lib
+          $(TLINK) /s /c $(Link_Debug) $(Link_Overlay) /L$(LIBPATH) @&&|
+          c0l.obj+
+          obj\test.obj
+          test.exe
+          map\test.map
+          alib.lib+
+          \source\resource\bbs\squish\lib\bc_dos_l.lib+
+          noehl.lib+
+          cl.lib
+|
+
+##########################################################################
+# SOURCE FILE DEPENDENCIES                                               #
+##########################################################################
+alib.obj: util.cfg src\alib.cpp
+
+alkbd.obj: util.cfg src\alkbd.cpp
+
+allog.obj: util.cfg src\allog.cpp
+
+almtsk.obj: util.cfg src\almtsk.cpp
+
+alstring.obj: util.cfg src\alstring.cpp
+
+aljam.obj: util.cfg src\aljam.cpp
+       
+albug.obj: util.cfg src\albug.cpp
+
+almem.obj: util.cfg src\almem.cpp
+
+altimer.obj: util.cfg src\altimer.cpp
+
+almapi.obj: util.cfg src\almapi.cpp
+
+altg.obj: util.cfg src\altg.cpp
+
+alfile.obj: util.cfg src\alfile.cpp
+
+al_crc32.obj: util.cfg src\al_crc32.cpp
+
+al_crc16.obj: util.cfg src\al_crc16.cpp
+
+al_td.obj: util.cfg src\al_td.cpp
+
+test.obj: util.cfg test\test.cpp
+
+alfos.obj: util.cfg src\alfos.cpp
+
+
+##########################################################################
+util.cfg: makefile.
+  copy &&|
+-ml
+-C
+$(COPT)
+-Y
+-G
+-O2
+-Z
+-d
+-H=alib.sym
+-w-ret
+-w-nci
+-w-inl
+-wpin
+-wamb
+-wamp
+-Tt
+-Tmx
+-w-par
+-wasm
+-w-eff
+-wcln
+-w-cpt
+-wdef
+-w-dup
+-w-pia
+-wsig
+-wnod
+-w-ill
+-w-sus
+-wstv
+-w-ucp
+-w-use
+-w-ext
+-w-ias
+-w-ibc
+-w-pre
+-w-nst
+-nOBJ
+-I$(INCLUDEPATH)
+-L$(LIBPATH)
+| util.cfg
+
+
